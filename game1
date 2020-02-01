@@ -1,0 +1,281 @@
+from pygame import *
+import random
+import time
+#首先写大家公有的属性，把它当作父类，其他的都去继承,这个父类我就命名为item
+class item:
+    def __init__(self,imgpath,x,y,window):
+        self.img=image.load(imgpath)
+        self.x=x
+        self.y=y
+        self.window=window
+    def display(self):
+        self.window.blit(self.img, (self.x,self.y))
+#××××  ×××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+class beijing(item):  #这个是我们的背景图片的类，由于全部继承了item父类，因此什么都不用写，但要加上pass，否则会被当作类没有写对报错
+    def down(self):
+        self.y+=2
+        if self.y==700:
+            self.y=-700
+         
+        
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+class wanjia(item):
+    def __init__(self,imgpath,x,y,window):
+        super().__init__(imgpath,x,y,window)
+        self.zidanlist=[]
+    
+    def moveleft(self):     #定义英雄飞机左边移动的函数，下面是右边移动，还有上下，都是对我们赋值的self。x，和self.y进行增减处理
+        self.x-=5
+        if self.x<-102:     #这里是我发现飞机可以飞出屏幕外面的区域来躲避敌人，而且飞出去就看不到了，因此，用if语句来限制住飞机的飞行区域
+            self.x=480      #当飞机飞到某个范围时，重置飞机的x或者y的坐标值，下面都是一样的if语句
+    def moveright(self):    
+        self.x+=5
+        if self.x>580:
+            self.x=-102
+    def moveup(self):
+        self.y-=5
+        if self.y<0:
+            self.y=0
+    def movedown(self):
+        self.y+=5
+        if self.y>574:
+            self.y=574
+    def fire(self):
+        wjzidan=wanjiazidan(r'C:\Users\user\Pictures\images\bullet2.png',self.x+61-10,self.y,self.window)
+        self.zidanlist.append(wjzidan)
+        
+        
+                
+            
+        
+        
+            
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+class diji(item): #这里是敌人飞机的类，敌人飞机也和玩家飞机一样，都是有图片，x，y值和window，因此继续集成item类
+    def down(self):
+        self.y+=5
+        
+        if self.y>800:
+            self.y=random.randint(-800,-100)
+            self.x=random.randint(0,430)
+            
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+class wanjiazidan(item):
+    def up(self):
+        self.y-=7
+        
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+
+class baozha(item):
+    pass        
+
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+#×××××××××××××××××××××××××××××××这里是类分割线，不然多了我眼睛都看花了××××××××××××××××××××××××××××××××××
+class boss(item):
+    def move(self):
+        self.x-=1
+        self.y+=1
+        if self.y>10 :
+            self.y-=1
+        elif self.x>310:
+            self.x-=1
+        elif self.y<0:
+            self.y+=2
+        elif self.x<0:
+            self.x+=1
+         
+    def fire(self):
+        for i in range(10):
+            bz=bosszd(r'C:\Users\user\Pictures\images\bullet1.png',self.x+84,self.y+258,self.window)
+            bz.display()
+            
+            bz.move()
+class bosszd(item):
+    def move(self):
+        self.x+=random.randint(1,3)
+        
+        self.y+=random.randint(1,2)
+            
+
+
+#  *************************************************************************************************
+#  ************************************************************************************************
+#  ************************************************************************************************
+#  ************************************************************************************************
+#  这里是为了分割类与主程序main（），因为代码太多看的我眼睛都花了，容易突然蒙了，找不出来某个类的位置**************
+#  *************************************************************************************************
+def main():
+    global hero
+    beijingx=0
+    beijingy=0
+    NANDU=3
+    siwang=0
+    fenshu=0
+    direnlist=[] #这是敌人飞机列表，每创建一个就把飞机加入进来
+    #这个init是初始化，表示让计算机先做好准备，马上要开始进行体力运动了
+    init()
+    #这里初始化音效
+    mixer.init()
+    #首先做一个游戏框，所有画面都是在里面完成的，这里用window来当作对象
+    window=display.set_mode((480,700),0,0)
+    #这里对应上面的beijing，实例化一个背景
+    bei=beijing(r'C:\Users\user\Pictures\images\background1.png',beijingx,beijingy,window)
+    bei2=beijing(r'C:\Users\user\Pictures\images\background1.png',beijingx,beijingy-700,window)
+
+    #实例化一个玩家，给定参数
+    hero=wanjia(r'C:\Users\user\Pictures\images\me1.png',200,500,window)
+    
+    #实例化一个字体，并配上文字
+    text=font.SysFont(r'C:\Users\user\Pictures\images\proclamate-heavy-2.ttf',60)
+    
+    #实例化一个boss
+    #bs=boss('/root/FEIJI/enemy3_hit.png',200,-160,window)
+    
+    
+    #实例化一个敌机，但是我们如果想给用户一些难度选择，比如用户选简单模式，就一次出三个敌人，选困难模式就一次出10个敌人，地狱就30个
+    #那么这个时候我们如果一个个去给敌人做实例化就比较麻烦而且不方便修改，因此我们给一个for循环，给定循环创建敌人飞机的次数，循环几次
+    #就创建几个敌人飞机，并且这个次数也是一个对象，这个对象放到前面让用户自己做选择来修改，是不是很完美呢。
+    def chuang():
+        for i in range(NANDU): 
+            #这里表示多次创建敌人，但是如果每一个敌人的x和y坐标每次创建都给一样的值，那么敌人就会重合了，因此这里用random函数来随机化x，y
+            diren=diji(r'C:\Users\user\Pictures\images\enemy%d.png'%random.randint(1,2),random.randint(0,420),random.randint(-800,0),window)
+            direnlist.append(diren)
+    def yhbz():
+        mixer.music.load(r'C:\Users\user\Pictures\images\用户爆炸.wav') # 载入音乐
+        mixer.music.set_volume(0.6)# 设置音量为 0.2
+        mixer.music.play() # 播放音乐
+    def drbz():
+        mixer.music.load(r'C:\Users\user\Pictures\images\敌人爆炸.wav') # 载入音乐
+        mixer.music.set_volume(0.4)# 设置音量为 0.2
+        mixer.music.play() # 播放音乐
+    def fire():
+        mixer.music.load(r'C:\Users\user\Pictures\images\fire.wav') # 载入音乐
+        mixer.music.set_volume(0.2)# 设置音量为 0.2
+        mixer.music.play() # 播放音乐
+        
+    
+    
+    #下面是一个游戏必须有的循环，循环里面需要不断的刷新游戏界面，但是不要把需要加载一次的图片等东西放入循环，那样会浪费计算机内存
+    while 1:
+        if len(direnlist)<NANDU:
+                chuang()
+        
+        
+        #这里是用beijing的类创建的实例bei，来运行beijing类中的贴图到显示区域的函数display（）
+        bei.display()
+        bei.down()
+        bei2.display()
+        bei2.down()
+        
+        #这里把hero这个实例贴到桌面上
+        hero.display()
+        #这里把敌人的飞机贴到桌面上，并且加上敌人飞机的移动函数down（）
+        for i in direnlist: #因为敌人飞机都在这个列表里面，所以按顺序都取出来贴到桌面上，都运行移动的函数
+            i.display()
+            i.down()
+        #这里是把生成的子弹从列表中取出来，并且贴图和移动
+        for i in hero.zidanlist:
+            i.display()
+            i.up()
+            if i.y<-11:
+                hero.zidanlist.remove(i)
+        #下面这个up是贴图后需要使用的，刷新桌面，不然显示的内容不会改变，在循环里面使用一次就行了
+        display.update()
+        
+        #下面这个for循环是用来判断射出的子弹是否打中敌人，如果打中敌人敌人就消失
+        for i in direnlist:
+            for p in hero.zidanlist:
+                if p.y<i.y+60 and p.y> i.y and p.x >i.x and p.x <i.x+80:
+                    fenshu+=1
+                    drbz()
+                    hero.zidanlist.remove(p) #这里让子弹也消失，增加游戏难度
+                    direnlist.remove(i)#那么敌人消失了我们想在这里放一个爆炸后的图片，增加游戏视觉效果
+                    direnbaozha=baozha(r'C:\Users\user\Pictures\images\enemy1_down3.png',i.x,i.y,window)
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    direnbaozha.display() #把爆炸图片贴上去
+                    display.update() #刷新桌面
+                    
+        
+        textx=text.render('SCORE:%d'%fenshu,1,(255,255,255))
+        window.blit(textx,(0,0))
+        
+        
+        #这里的for循环，是用来判断敌人飞机和用户飞机是否相撞的，因为有很多敌人飞机，他们都在direnlist这个
+        #列表里面，所以要每一个都取出来判断。            
+        for i in direnlist:
+            #这个if是判断碰撞的范围，这里用到x和y的范围判断，仔细想一想就理解了，是我自己想出来的，网上的方法有用精力组来判断碰撞的，也有用reac这个函数来判断的，但是我不是很理解，于是我自己想出了xy判断方式
+            if hero.x>i.x-50 and hero.x < i.x+50 and hero. y< i.y+30 and hero.y> i.y-100:
+                #这里的if是用来判断敌人列表有没有东西，如果没有飞机了，会报错
+                
+                direnlist.remove(i) #前面条件满足了，即发生了碰撞，飞机移除
+                
+                #实例化爆炸图片
+                cuihui=baozha(r'C:\Users\user\Pictures\images\me_destroy_3.png',hero.x,hero.y,window)
+                cuihui.display()
+                display.update()
+                yhbz()
+                x=1
+                while x==1:
+                    print('您已经死亡')
+                    for i in event.get(): #pygame.event.get()是全称，但是这里我们用from来进行的导入模块，因此不需要pygame
+                        if i.type==QUIT:  #这个QUIT是pygame.QUIT
+                            quit()  
+                        
+                    time.sleep(1)
+                    x=2    
+                        
+                    
+                
+                
+                
+                
+        
+                    
+        
+        #下面这个for是用来检测键盘事件，也就是用户按了哪些按键或者鼠标点了啥,当没有的时候就不能进行操作游戏角色和点右下角红x退出游戏等功能
+        for i in event.get(): #pygame.event.get()是全称，但是这里我们用from来进行的导入模块，因此不需要pygame
+            if i.type==QUIT:  #这个QUIT是pygame.QUIT
+                quit()  
+            if i.type==KEYDOWN and i.key==K_LEFT: #用这种方式是可以对飞机进行移动的，但是只能按一次移动一次，不能实现长按一直动
+                hero.moveleft()
+            if i.type==KEYDOWN and i.key==K_SPACE:
+                hero.fire()
+                fire()
+               
+            changan=key.get_pressed()  #pygame.key.get_pressed()这个方法是用来判断用户长按了哪个按键的
+            if changan[K_LEFT] or changan[K_a]: #如果长的按键为a或者左方向键，就运行下面的左移动的函数，至于键盘案件的对应写法，可以去百度看看
+                hero.moveleft()
+            if changan[K_RIGHT] or changan[K_d]:  #下面都类似
+                hero.moveright()
+            if changan[K_UP] or changan[K_w]:
+                hero.moveup()
+            if changan[K_DOWN] or changan[K_s]:
+                hero.movedown()
+            #if changan[K_DOWN] or changan[K_SPACE]:
+            #    hero.fire()
+        
+    
+    
+    
+
+if __name__=='__main__':
+    main()
